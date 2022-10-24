@@ -21,10 +21,14 @@ public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;
 
-    @PostMapping("/login")
-    /*
-    @RequestBody:用来接收前端传给后端的JSON字符串
+    /**
+     * 登录功能
+     * @param request
+     * @param employee
+     * @return
      */
+    @PostMapping("/login")
+    //@RequestBody:用来接收前端传给后端的JSON字符串
     public R<Employee> employeeLogin(HttpServletRequest request,@RequestBody Employee employee){
         //1.查询用户，并验证是否有此用户
         LambdaQueryWrapper<Employee> wrapper = new LambdaQueryWrapper<>();    //查询条件构造器
@@ -46,5 +50,16 @@ public class EmployeeController {
         request.getSession().setAttribute("employee",emp.getId());
 
         return R.success(emp);
+    }
+
+    /**
+     * 退出登录
+     * @param request
+     * @return
+     */
+    @PostMapping("/logout")
+    public R<String> logout(HttpServletRequest request){
+        request.removeAttribute("employee");
+        return R.success("退出登录");
     }
 }
