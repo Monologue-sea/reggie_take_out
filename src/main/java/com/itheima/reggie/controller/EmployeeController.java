@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.time.LocalDateTime;
 
 @Slf4j
 @RestController
@@ -29,6 +30,7 @@ public class EmployeeController {
      */
     @PostMapping("/login")
     //@RequestBody:用来接收前端传给后端的JSON字符串
+    //@ResponseBody：将java对象转为json格式的数据
     public R<Employee> employeeLogin(HttpServletRequest request,@RequestBody Employee employee){
         //1.查询用户，并验证是否有此用户
         LambdaQueryWrapper<Employee> wrapper = new LambdaQueryWrapper<>();    //查询条件构造器
@@ -61,5 +63,30 @@ public class EmployeeController {
     public R<String> logout(HttpServletRequest request){
         request.removeAttribute("employee");
         return R.success("退出登录");
+    }
+
+    /**
+     * 添加员工
+     * @param request
+     * @param employee
+     * @return
+     */
+    @PostMapping
+    public R<String> save(HttpServletRequest request,@RequestBody Employee employee){
+        //1.赋初始密码值（MD5加密）
+        String password = "12345";
+        employee.setPassword(DigestUtils.md5DigestAsHex(password.getBytes()));
+        //2.设置创建时间
+        employee.setCreateTime(LocalDateTime.now());
+        //3.设置更新时间
+        employee.setUpdateTime(LocalDateTime.now());
+        //4.设置创建人id
+        Long empId = (Long)request.getSession().getAttribute("employee");
+        employee.setCreateUser(empId);
+        //5.设置更新人id
+        employee.setUpdateUser(empId);
+        //6.存储用户
+        employeeService.save(employee);
+        return R.success("添加成功！");
     }
 }
