@@ -109,4 +109,24 @@ public class EmployeeController {
         employeeService.page(pageInfo,wrapper);
         return R.success(pageInfo);
     }
+
+    /**
+     * 更新员工信息
+     * @param request
+     * @param employee
+     * @return
+     */
+    @PutMapping
+    public R<String> update(HttpServletRequest request,@RequestBody Employee employee){
+        //修改更新时间
+        //log.info(employee.toString());
+        employee.setUpdateTime(LocalDateTime.now());
+        //获取当前用户id
+        Long userId = (Long)request.getSession().getAttribute("employee");
+        //修改更新人
+        employee.setUpdateUser(userId);
+        //完成跟新操作
+        employeeService.updateById(employee);
+         return R.success("更新成功！");
+    }
 }
