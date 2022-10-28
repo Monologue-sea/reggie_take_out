@@ -1,17 +1,17 @@
 package com.itheima.reggie.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.Employee;
 import com.itheima.reggie.service.EmployeeService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.DigestUtils;
-import org.springframework.web.bind.annotation.*;
 
+import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -88,5 +88,25 @@ public class EmployeeController {
         //6.存储用户
         employeeService.save(employee);
         return R.success("添加成功！");
+    }
+
+    /**
+     * 员工信息分页查询
+     * @param page
+     * @param pageSize
+     * @param name
+     * @return
+     */
+    @GetMapping("/page")
+    public R<Page> page(int page,int pageSize,String name){
+        //构造分页构造器
+        Page pageInfo = new Page(page,pageSize);
+        //构造条件构造器
+        LambdaQueryWrapper<Employee> wrapper = new LambdaQueryWrapper();
+        wrapper.like(StringUtils.isNotEmpty(name),Employee::getName,name);
+        //设置排序条件
+        wrapper.orderByDesc(Employee::getUpdateTime);
+        employeeService.page(pageInfo,wrapper);
+        return R.success(pageInfo);
     }
 }
