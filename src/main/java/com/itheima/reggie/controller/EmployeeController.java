@@ -77,14 +77,14 @@ public class EmployeeController {
         String password = "12345";
         employee.setPassword(DigestUtils.md5DigestAsHex(password.getBytes()));
         //2.设置创建时间
-        employee.setCreateTime(LocalDateTime.now());
+        //employee.setCreateTime(LocalDateTime.now());
         //3.设置更新时间
-        employee.setUpdateTime(LocalDateTime.now());
+        //employee.setUpdateTime(LocalDateTime.now());
         //4.设置创建人id
-        Long empId = (Long)request.getSession().getAttribute("employee");
-        employee.setCreateUser(empId);
+        //Long empId = (Long)request.getSession().getAttribute("employee");
+        //employee.setCreateUser(empId);
         //5.设置更新人id
-        employee.setUpdateUser(empId);
+        //employee.setUpdateUser(empId);
         //6.存储用户
         employeeService.save(employee);
         return R.success("添加成功！");
