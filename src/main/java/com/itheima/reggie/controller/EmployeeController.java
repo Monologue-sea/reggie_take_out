@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 
+/**
+ * 员工管理
+ */
 @Slf4j
 @RestController
 @RequestMapping("/employee")
@@ -120,11 +123,11 @@ public class EmployeeController {
     public R<String> update(HttpServletRequest request,@RequestBody Employee employee){
         //修改更新时间
         //log.info(employee.toString());
-        employee.setUpdateTime(LocalDateTime.now());
+        //employee.setUpdateTime(LocalDateTime.now());
         //获取当前用户id
-        Long userId = (Long)request.getSession().getAttribute("employee");
+        //Long userId = (Long)request.getSession().getAttribute("employee");
         //修改更新人
-        employee.setUpdateUser(userId);
+        //employee.setUpdateUser(userId);
         //完成跟新操作
         employeeService.updateById(employee);
          return R.success("更新成功！");
