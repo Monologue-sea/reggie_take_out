@@ -8,21 +8,22 @@ import com.itheima.reggie.entity.Dish;
 import com.itheima.reggie.entity.Setmeal;
 import com.itheima.reggie.mapper.CategoryMapper;
 import com.itheima.reggie.service.CategoryService;
+import com.itheima.reggie.service.DishService;
+import com.itheima.reggie.service.SetmealService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> implements CategoryService {
     @Autowired
-    private SetmealServiceImpl setmealService;
+    private SetmealService setmealService;
     @Autowired
-    private DishServiceImpl dishService;
+    private DishService dishService;
 
     @Override
     public void remove(Long id) {
-        /**
-         * Setmeal
-         */
+
+        //setmeal
         //条件构造器
         LambdaQueryWrapper<Setmeal> queryWrapper1 = new LambdaQueryWrapper<>();
         queryWrapper1.eq(Setmeal::getCategoryId, id);
@@ -33,9 +34,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
            throw  new CustomException("当前有业务关联，删除失败");
         }
 
-        /**
-         * Dish
-         */
+        //Dish
         LambdaQueryWrapper<Dish> queryWrapper2 = new LambdaQueryWrapper<>();
         queryWrapper2.eq(Dish::getCategoryId, id);
         //根据id查询，是否有关联
