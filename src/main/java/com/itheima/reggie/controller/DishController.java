@@ -85,4 +85,45 @@ public class DishController {
         dtoPageInfo.setRecords(list);
         return R.success(dtoPageInfo);
     }
+
+    /**
+     * 显示菜品信息
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    //因为需要返回一个列表给页面展示数据，所以需要返回DTO
+    public R<DishDto> alterDish(@PathVariable Long id){
+        DishDto dishDto = dishService.selectDishInfo(id);
+        return R.success(dishDto);
+    }
+
+    /**
+     * 更新菜品信息
+     * @param dishDto
+     * @return
+     */
+    @PutMapping
+    //不需要向页面返回dto对象，只需要更新数据库信息，所以不用返回dto对象
+    public R<String> update(@RequestBody DishDto dishDto){
+        dishService.updateDish(dishDto);
+        return R.success("修改菜品成功！");
+    }
+
+    /**
+     * 根据条件查询对应菜品数据
+     * @param dish
+     * @return
+     */
+    @GetMapping("/list")
+    public R<List<Dish>> list(Dish dish){
+        //条件构造器
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(dish.getCategoryId() != null,Dish::getCategoryId,dish.getCategoryId())
+                .eq(Dish::getStatus,1)
+                .orderByAsc(Dish::getSort)
+                .orderByDesc(Dish::getUpdateTime);
+        List<Dish> list = dishService.list(queryWrapper);
+        return R.success(list);
+    }
 }

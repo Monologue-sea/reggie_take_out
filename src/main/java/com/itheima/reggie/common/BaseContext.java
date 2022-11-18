@@ -1,24 +1,24 @@
 package com.itheima.reggie.common;
 
 /**
- * 保存和获取当前线程的用户Id
+ * 基于ThreadLocal封装工具类，用户保存和获取当前登录用户id
  */
 public class BaseContext {
     private static ThreadLocal<Long> threadLocal = new ThreadLocal<>();
 
     /**
      * 设置值
-     * @param empId
+     * @param id
      */
-    public static void setThreadId(Long empId){
-        threadLocal.set(empId);
+    public static void setCurrentId(Long id){
+        threadLocal.set(id);
     }
 
     /**
      * 获取值
      * @return
      */
-    public static Long getThreadId(){
+    public static Long getCurrentId(){
         return threadLocal.get();
     }
 }
