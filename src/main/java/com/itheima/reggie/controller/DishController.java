@@ -6,15 +6,20 @@ import com.itheima.reggie.common.R;
 import com.itheima.reggie.dto.DishDto;
 import com.itheima.reggie.entity.Category;
 import com.itheima.reggie.entity.Dish;
+import com.itheima.reggie.entity.DishFlavor;
 import com.itheima.reggie.service.CategoryService;
+import com.itheima.reggie.service.DishFlavorService;
 import com.itheima.reggie.service.DishService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -28,6 +33,12 @@ public class DishController {
     @Autowired
     private CategoryService categoryService;
 
+    @Autowired
+    private DishFlavorService dishFlavorService;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
+
     /**
      * 新增菜品
      * @param dishDto
@@ -35,6 +46,9 @@ public class DishController {
      */
     @PostMapping
     public R<String> save(@RequestBody DishDto dishDto){
+        //清除缓存
+        String key = "dish-" + dishDto.getCategoryId() + "-1";
+        redisTemplate.delete(key);
         dishService.saveDish(dishDto);
         return R.success("添加成功！");
     }
@@ -106,6 +120,10 @@ public class DishController {
     @PutMapping
     //不需要向页面返回dto对象，只需要更新数据库信息，所以不用返回dto对象
     public R<String> update(@RequestBody DishDto dishDto){
+        //清除缓存
+        String key = "dish-" + dishDto.getCategoryId() + "-1";
+        redisTemplate.delete(key);
+
         dishService.updateDish(dishDto);
         return R.success("修改菜品成功！");
     }
@@ -116,14 +134,42 @@ public class DishController {
      * @return
      */
     @GetMapping("/list")
-    public R<List<Dish>> list(Dish dish){
+    public R<List<DishDto>> list(Dish dish){
+        List<DishDto> dishDtoList = null;
+        //设置key
+        String key = "dish-" + dish.getCategoryId() + "-" + dish.getStatus();
+        dishDtoList = (List<DishDto>) redisTemplate.opsForValue().get(key);
+        //如果存在，直接返回
+        if(dishDtoList != null){
+            return R.success(dishDtoList);
+        }
+
         //条件构造器
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(dish.getCategoryId() != null,Dish::getCategoryId,dish.getCategoryId())
                 .eq(Dish::getStatus,1)
                 .orderByAsc(Dish::getSort)
                 .orderByDesc(Dish::getUpdateTime);
-        List<Dish> list = dishService.list(queryWrapper);
-        return R.success(list);
+        List<Dish> dishList = dishService.list(queryWrapper);
+
+        dishDtoList = dishList.stream().map((dishItem)->{
+            DishDto dishDto = new DishDto();
+            BeanUtils.copyProperties(dishItem,dishDto);
+            //设置dishDto的categoryName
+            Long categoryId = dishItem.getCategoryId();
+            Category category = categoryService.getById(categoryId);
+            if(category != null){
+                dishDto.setCategoryName(category.getName());
+            }
+            //设置dishDto的flavors（口味）
+            LambdaQueryWrapper<DishFlavor> flavorWrapper = new LambdaQueryWrapper<>();
+            flavorWrapper.eq(DishFlavor::getDishId,dish.getId());
+            List<DishFlavor> flavors = dishFlavorService.list(flavorWrapper);
+            dishDto.setFlavors(flavors);
+            return dishDto;
+        }).collect(Collectors.toList());
+        // 如果不存在将dishDtoList存储value中
+        redisTemplate.opsForValue().set(key,dishDtoList,60, TimeUnit.MINUTES);
+        return R.success(dishDtoList);
     }
 }
