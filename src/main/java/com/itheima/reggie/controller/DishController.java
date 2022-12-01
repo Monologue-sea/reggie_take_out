@@ -123,7 +123,6 @@ public class DishController {
         //清除缓存
         String key = "dish-" + dishDto.getCategoryId() + "-1";
         redisTemplate.delete(key);
-
         dishService.updateDish(dishDto);
         return R.success("修改菜品成功！");
     }
@@ -172,4 +171,15 @@ public class DishController {
         redisTemplate.opsForValue().set(key,dishDtoList,60, TimeUnit.MINUTES);
         return R.success(dishDtoList);
     }
+
+    /*
+    Spring Cache：@EnableCaching--开启缓存功能（启动类注解）
+                  @Cacheable--在方法执行前spring先查看缓存中是否有数据，如果有数据，则直接返回缓存数据，若没有数据，则调用方法并将方法的返回值放入缓存中（方法注解）
+                  @CachePut（value，key）--将方法的返回值放入缓存中（方法注解）
+                  @CacheEvict：将一条或者多条数据从缓存中删除（方法注解）
+
+    使用：1.只需要导入相关的maven坐标，spring-boot-starter-cache
+         2.key的获取可以使用表达式语言--#参数，result：返回值，形参名
+         3.value：缓存的名称，每个缓存下面可以有多个key，key：缓存的key，condition：条件，满足条件时才缓存数据
+     */
 }
