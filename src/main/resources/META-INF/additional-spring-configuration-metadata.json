@@ -4,5 +4,10 @@
       "name": "reggie.path",
       "type": "java.lang.String",
       "description": "Description for reggie.path."
-  }
-] }
+    },
+    {
+      "name": "spring.shardingsphere.datasource.names",
+      "type": "java.lang.String",
+      "description": "Description for spring.shardingsphere.datasource.names."
+    }
+  ] }
