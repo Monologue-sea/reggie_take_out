@@ -1,5 +1,6 @@
 package com.itheima.reggie.common;
 
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -16,6 +17,7 @@ Serializable：序列化接口，序列化是将对象状态转换为可保持�
               把字节序列恢复为对象的过程称为对象的反序列化
  */
 @Data
+@ApiModel("返回结果")
 public class R<T> implements Serializable {
 
     private Integer code; //编码：1成功，0和其它数字为失败
